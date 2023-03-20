@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 # hyperparameters
 batch_size = 8 # how many independent sequences will we process in parallel?
-block_size = 128
+block_size = 16
 max_iters = 5000
 eval_interval = 100
 learning_rate = 3e-4
