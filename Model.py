@@ -210,7 +210,7 @@ class XfmrModel(nn.Module):
         self.token_embedding_table = nn.Embedding(len(chars), n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
         self.area_head = nn.Linear(1, n_embd)
-        self.typehead = nn.Linear(len(class_map.items()), n_embd)
+        self.type_head = nn.Linear(len(class_map.items()), n_embd)
         self.blocks = nn.Sequential(*[Block(n_embd, n_head = n_head) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_embd)
         self.lm_head = nn.Linear(n_embd, len(class_map.items()))
@@ -224,11 +224,13 @@ class XfmrModel(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
     
-    def forward(self, idx, targets = None):
-        B, T = idx.shape
-        tok_emb = self.token_embedding_table(idx)
+    def forward(self, A, B, C, targets = None):
+        B, T = A.shape
+        tok_emb = self.token_embedding_table(A)
         pos_emb = self.position_embedding_table(torch.arange(T, device = device))
-        x = tok_emb + pos_emb
+        area_emb = self.area_head(B)
+        type_emb = self.type_head(C)
+        x = tok_emb + pos_emb + area_emb + type_emb
         x = self.blocks(x)
         x = self.ln_f(x)
         x = self.lm_head(x)
@@ -307,9 +309,11 @@ while True:
         while test != "X":
             text = input("Test your room name")
             sample = get_Sample(text, True)
-            X, Y = sample
-            X = X.view(1, -1)
-            logits, loss = model(X, Y)
+            A, B, C, D = sample
+            A = A.view(1, -1)
+            B = B.view(1, -1)
+            C = C.view(1, -1)
+            logits, loss = model(A, B, C, D)
             print(logits)
             max = torch.argmax(logits)
             print(list(class_map.keys())[max])
