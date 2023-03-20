@@ -65,8 +65,8 @@ def get_Sample(input, printSample=False):
         if(chars.count(line[i]) > 0):
             sample[i] = chars.index(line[i])
     try :
-        area = (float)lines[1]
-    except: #no exceptions        
+        area[0] = (float)(lines[1])
+    except: area[0] = 0
        
     if len(lines) > 1 :
         classification = lines[-1]
@@ -226,6 +226,7 @@ class XfmrModel(nn.Module):
     
     def forward(self, A, B, C, targets = None):
         B, T = A.shape
+        print(A)
         tok_emb = self.token_embedding_table(A)
         pos_emb = self.position_embedding_table(torch.arange(T, device = device))
         area_emb = self.area_head(B)
@@ -247,7 +248,7 @@ class XfmrModel(nn.Module):
 
         return logits, loss
 
-txt_path = "/workspaces/OLF-Data/OccupancyNetworkData.txt"
+txt_path = "OccupancyNetworkData.txt"
 
 path = "/workspaces/OLF-Data/OccupancyNetwork.pt"
 model = XfmrModel()
@@ -271,9 +272,13 @@ def RunTraining():
         t0 = time.time()
         batch = batch_loader.next()
         batch = [t.to(device) for t in batch]
-        X, Y = batch
+        A, B, C, D = batch
+        print(A)
+        print(B)
+        print(C)
+        print(D)
 
-        logits, loss = model(X, Y)
+        logits, loss = model(A, B, C, D)
 
         model.zero_grad(set_to_none = True)
         loss.backward()
