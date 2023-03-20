@@ -325,6 +325,7 @@ while True:
             A = A.view(1, -1)
             B = B.view(1, -1)
             C = C.view(1, -1)
+            print(A, B, C)
             logits, loss = model(A, B, C, D)
             print(logits)
             max = torch.argmax(logits)
