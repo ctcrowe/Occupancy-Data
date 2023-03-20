@@ -76,7 +76,7 @@ def get_Sample(input, printSample=False):
     
     if printSample :
         print(input, sample, classification)
-    return torch.tensor(sample), torch.tensor(area), torch.tensor(types), torch.tensor(classification)
+    return torch.tensor(sample), torch.tensor(area, dtype = torch.float), torch.tensor(types, dtype = torch.float), torch.tensor(classification)
 
 class OLFDataset(Dataset):
     def __init__(self, lines):
@@ -134,8 +134,8 @@ def evaluate(model, dataset, max_batches=None):
     losses = []
     for i, batch in enumerate(loader):
         batch = [t.to(device) for t in batch]
-        X, Y = batch
-        logits, loss = model(X, Y)
+        A, B, C, D = batch
+        logits, loss = model(A, B, C, D)
         losses.append(loss.item())
         if max_batches is not None and i >= max_batches:
             break
@@ -209,8 +209,8 @@ class XfmrModel(nn.Module):
         super().__init__()
         self.token_embedding_table = nn.Embedding(len(chars), n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
-        self.area_head = nn.Linear(1, n_embd)
-        self.type_head = nn.Linear(len(class_map.items()), n_embd)
+        self.area_head = nn.Linear(1, n_embd, dtype = torch.float)
+        self.type_head = nn.Linear(len(class_map.items()), n_embd, dtype = torch.float)
         self.blocks = nn.Sequential(*[Block(n_embd, n_head = n_head) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_embd)
         self.lm_head = nn.Linear(n_embd, len(class_map.items()))
@@ -225,12 +225,13 @@ class XfmrModel(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
     
     def forward(self, A, B, C, targets = None):
-        B, T = A.shape
-        print(A)
+        Batch, T = A.shape
         tok_emb = self.token_embedding_table(A)
         pos_emb = self.position_embedding_table(torch.arange(T, device = device))
         area_emb = self.area_head(B)
+        area_emb = area_emb.unsqueeze(1).repeat(1, block_size, 1)
         type_emb = self.type_head(C)
+        type_emb = type_emb.unsqueeze(1).repeat(1, block_size, 1)
         x = tok_emb + pos_emb + area_emb + type_emb
         x = self.blocks(x)
         x = self.ln_f(x)
@@ -250,7 +251,7 @@ class XfmrModel(nn.Module):
 
 txt_path = "OccupancyNetworkData.txt"
 
-path = "/workspaces/OLF-Data/OccupancyNetwork.pt"
+path = "/workspaces/OccupancyNet/OccupancyNetwork.pt"
 model = XfmrModel()
 if os.path.isfile(path):
     statedict = torch.load(path)
@@ -273,10 +274,6 @@ def RunTraining():
         batch = batch_loader.next()
         batch = [t.to(device) for t in batch]
         A, B, C, D = batch
-        print(A)
-        print(B)
-        print(C)
-        print(D)
 
         logits, loss = model(A, B, C, D)
 
