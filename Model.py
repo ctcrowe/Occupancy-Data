@@ -82,16 +82,16 @@ class OLFDataset(Dataset):
         #with open('OLFNetworkData.txt', 'r', encoding='utf-8') as f:
             #text = f.read()
         for line in lines: # text.splitlines():
-            base, sample = get_Sample(line)
-            self.data.append([base, sample])
+            name, area, types, sample = get_Sample(line)
+            self.data.append([name, area, types, sample])
         self.stoi = {ch:i+1 for i,ch in enumerate(chars)}
     
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
-        data, class_name = self.data[idx]
-        return data, class_name
+        name, area, types, sample = self.data[idx]
+        return name, area, types, sample
     
 def create_datasets(input_file):
     with open(input_file, 'r') as f:
