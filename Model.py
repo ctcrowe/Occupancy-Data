@@ -60,7 +60,7 @@ def get_Sample(input, printSample=False):
     line = lines[0]
     sample = [0] * block_size
     area = [0]
-    types = [0] * len(class_map)
+    types = [0] * len(class_map.items())
     for i in range(len(line)):
         if(chars.count(line[i]) > 0):
             sample[i] = chars.index(line[i])
@@ -209,6 +209,8 @@ class XfmrModel(nn.Module):
         super().__init__()
         self.token_embedding_table = nn.Embedding(len(chars), n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.area_head = nn.Linear(1, n_embd)
+        self.typehead = nn.Linear(len(class_map.items()), n_embd)
         self.blocks = nn.Sequential(*[Block(n_embd, n_head = n_head) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_embd)
         self.lm_head = nn.Linear(n_embd, len(class_map.items()))
