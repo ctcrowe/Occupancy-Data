@@ -59,6 +59,8 @@ def get_Sample(input, printSample=False):
     lines = input.split(',')
     line = lines[0]
     sample = [0] * block_size
+    area = [0]
+    types = [0] * len(class_map)
     for i in range(len(line)):
         if(chars.count(line[i]) > 0):
             sample[i] = chars.index(line[i])
@@ -70,7 +72,7 @@ def get_Sample(input, printSample=False):
     
     if printSample :
         print(input, sample, classification)
-    return torch.tensor(sample), torch.tensor(classification)
+    return torch.tensor(sample), torch.tensor(area), torch.tensor(types), torch.tensor(classification)
 
 class OLFDataset(Dataset):
     def __init__(self, lines):
