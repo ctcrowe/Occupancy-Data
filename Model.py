@@ -62,8 +62,10 @@ def get_Sample(input, printSample=False):
     area = [0]
     types = [0] * len(class_map.items())
     for i in range(len(line)):
-        if(chars.count(line[i]) > 0):
+        try :
             sample[i] = chars.index(line[i])
+        except :
+            pass
     try :
         area[0] = (float)(lines[1])
     except: area[0] = 0
