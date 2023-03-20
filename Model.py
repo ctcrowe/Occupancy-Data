@@ -67,11 +67,19 @@ def get_Sample(input, printSample=False):
     try :
         area[0] = (float)(lines[1])
     except: area[0] = 0
+
+    for i in range(len(lines)):
+        try :
+            potentialclass = lines[i]
+            potentialclass = class_map[potentialclass]
+            types[potentialclass] = 1
+        except :
+            pass
        
-    if len(lines) > 1 :
+    try :
         classification = lines[-1]
         classification = class_map[classification]
-    else :
+    except :
         classification = 0
     
     if printSample :
