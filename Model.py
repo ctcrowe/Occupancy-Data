@@ -64,6 +64,10 @@ def get_Sample(input, printSample=False):
     for i in range(len(line)):
         if(chars.count(line[i]) > 0):
             sample[i] = chars.index(line[i])
+    try :
+        area = (float)lines[1]
+    except: #no exceptions        
+       
     if len(lines) > 1 :
         classification = lines[-1]
         classification = class_map[classification]
