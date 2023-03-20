@@ -247,9 +247,9 @@ class XfmrModel(nn.Module):
 
         return logits, loss
 
-txt_path = "/workspaces/OLF-Data/OLFNetworkData.txt"
+txt_path = "/workspaces/OLF-Data/OccupancyNetworkData.txt"
 
-path = "/workspaces/OLF-Data/OLFNetwork.pt"
+path = "/workspaces/OLF-Data/OccupancyNetwork.pt"
 model = XfmrModel()
 if os.path.isfile(path):
     statedict = torch.load(path)
