@@ -261,7 +261,7 @@ class XfmrModel(nn.Module):
 
 txt_path = "OccupancyNetworkData.txt"
 
-path = "/workspaces/OccupancyNet/OccupancyNetwork.pt"
+path = "/workspaces/Occupancy-Data/OccupancyNetwork.pt"
 model = XfmrModel()
 if os.path.isfile(path):
     statedict = torch.load(path)
