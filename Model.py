@@ -263,8 +263,7 @@ class XfmrModel(nn.Module):
         return logits, loss
 
 txt_path = "OccupancyNetworkData.txt"
-
-path = "/workspaces/Occupancy-Data/OccupancyNetwork.pt"
+path = "/workspaces/OccupancyNet/OccupancyNetwork.pt"
 model = XfmrModel()
 if os.path.isfile(path):
     statedict = torch.load(path)
