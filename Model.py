@@ -163,12 +163,12 @@ class Head(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-        B,T,C = x.shape
+        #B,C = x.shape
         k = self.key(x)
         q = self.query(x)
 
         wei = q @ k.transpose(-2, -1) * k.shape[-1]**-0.5
-        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+        #wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
         wei = F.softmax(wei, dim=-1)
         wei = self.dropout(wei)
         v = self.value(x)
@@ -240,16 +240,15 @@ class XfmrModel(nn.Module):
         tok_emb = self.token_embedding_table(A)
         pos_emb = self.position_embedding_table(torch.arange(T, device = device))
         area_emb = self.area_head(B)
-        area_emb = area_emb.unsqueeze(1).repeat(1, block_size, 1)
         type_emb = self.type_head(C)
-        type_emb = type_emb.unsqueeze(1).repeat(1, block_size, 1)
         x = tok_emb + pos_emb
+        x = torch.sum(x, dim=-2, keepdim=False)
         x = self.first_block(x)
         x = x + area_emb + type_emb
         x = self.blocks(x)
         x = self.ln_f(x)
         x = self.lm_head(x)
-        logits = torch.sum(x, dim=-2, keepdim=False)
+        logits = x
 
         if targets is None:
             loss = None
