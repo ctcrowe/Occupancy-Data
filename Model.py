@@ -240,15 +240,16 @@ class XfmrModel(nn.Module):
         tok_emb = self.token_embedding_table(A)
         pos_emb = self.position_embedding_table(torch.arange(T, device = device))
         area_emb = self.area_head(B)
+        area_x = area_emb.unsqueeze(1).repeat(1, block_size, 1)
         type_emb = self.type_head(C)
+        type_x = type_emb.unsqueeze(1).repeat(1, block_size, 1)
         x = tok_emb + pos_emb
-        x = torch.sum(x, dim=-2, keepdim=False)
         x = self.first_block(x)
-        x = x + area_emb + type_emb
+        x = x + area_x + type_x
         x = self.blocks(x)
         x = self.ln_f(x)
         x = self.lm_head(x)
-        logits = x
+        logits = torch.sum(x, dim=-2, keepdim=False)
 
         if targets is None:
             loss = None
