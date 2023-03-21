@@ -221,7 +221,8 @@ class XfmrModel(nn.Module):
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
         self.area_head = nn.Linear(1, n_embd, dtype = torch.float)
         self.type_head = nn.Linear(len(class_map.items()), n_embd, dtype = torch.float)
-        self.blocks = nn.Sequential(*[Block(n_embd, n_head = n_head) for _ in range(n_layer)])
+        self.first_block = Block(n_embd, n_head=n_head)
+        self.blocks = nn.Sequential(*[Block(n_embd, n_head = n_head) for _ in range(n_layer - 1)])
         self.ln_f = nn.LayerNorm(n_embd)
         self.lm_head = nn.Linear(n_embd, len(class_map.items()))
         self.apply(self.__init__weights)
@@ -242,7 +243,9 @@ class XfmrModel(nn.Module):
         area_emb = area_emb.unsqueeze(1).repeat(1, block_size, 1)
         type_emb = self.type_head(C)
         type_emb = type_emb.unsqueeze(1).repeat(1, block_size, 1)
-        x = tok_emb + pos_emb + area_emb + type_emb
+        x = tok_emb + pos_emb
+        x = self.first_block(x)
+        x = x + area_emb + type_emb
         x = self.blocks(x)
         x = self.ln_f(x)
         x = self.lm_head(x)
