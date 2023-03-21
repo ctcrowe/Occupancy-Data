@@ -88,7 +88,7 @@ def get_Sample(input, printSample=False):
         print(input, sample, classification)
     return torch.tensor(sample), torch.tensor(area, dtype = torch.float), torch.tensor(types, dtype = torch.float), torch.tensor(classification)
 
-class OLFDataset(Dataset):
+class OccupancyDataset(Dataset):
     def __init__(self, lines):
         #self.txt_path = "/workspaces/OLF-Data/OLFNetworkData.txt"
         self.data = []
@@ -120,8 +120,8 @@ def create_datasets(input_file):
     test_words = [inputs[i] for i in rp[-test_set_size:]]
     print(f"split up the dataset into {len(train_words)} training examples and {len(test_words)} test examples")
 
-    train_dataset = OLFDataset(train_words)
-    test_dataset = OLFDataset(test_words)
+    train_dataset = OccupancyDataset(train_words)
+    test_dataset = OccupancyDataset(test_words)
     return train_dataset, test_dataset
 
 class InfiniteDataLoader:
